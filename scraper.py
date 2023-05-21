@@ -6,7 +6,8 @@ from datetime import datetime, timedelta
 class Game:
     """Class that represents an upcoming valorant esports game"""
 
-    def __init__(self, team1: str, team2: str, time: datetime) -> None:
+    def __init__(self, url: str, team1: str, team2: str, time: datetime) -> None:
+        self.url: str = url
         self.team1: str = team1
         self.team2: str = team2
         self.time: datetime = time
@@ -55,9 +56,8 @@ async def get_games(event_url: str) -> list[Game]:
         if len(eta.split()) != 1 and 'm' not in eta:  # Filters all games further than an hour away
             continue
         names = game.find_all('div', {'class': 'match-item-vs-team-name'})
-        print(names)
         time = datetime.strptime(game.find('div', {'class': 'match-item-time'}).text.strip(), '%I:%M %p')
         now = datetime.now()
         time = time.replace(day=now.day, year=now.year, month=now.month)
-        games.append(Game(names[0].text.strip(), names[1].text.strip(), time))
+        games.append(Game(game['href'], names[0].text.strip(), names[1].text.strip(), time))
     return games
