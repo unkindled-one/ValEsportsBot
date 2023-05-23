@@ -17,7 +17,6 @@ class Game:
         return self.time - datetime.now()
 
 
-
 async def get_upcoming_games() -> list[Game]:
     """Gets a list of all upcoming games to notify the guilds of"""
     event_urls = await get_events()
