@@ -1,22 +1,21 @@
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
+from dataclasses import dataclass
 
 
+@dataclass
 class Game:
     """Class that represents an upcoming valorant esports game"""
-
-    def __init__(self, url: str, team1: str, team2: str, time: datetime) -> None:
-        self.url: str = url
-        self.team1: str = team1
-        self.team2: str = team2
-        self.time: datetime = time
-
-    def __str__(self):
-        return f'{self.team1} vs. {self.team2} at {self.time}'
+    id: int
+    url: str
+    team1: str
+    team2: str
+    time: datetime
 
     def get_time_to_game(self) -> timedelta:
-        return datetime.now() - self.time
+        return self.time - datetime.now()
+
 
 
 async def get_upcoming_games() -> list[Game]:
@@ -52,12 +51,15 @@ async def get_games(event_url: str) -> list[Game]:
     game_htmls = soup.find_all('a', {'class': [game_css_class_1, game_css_class_2]})
     games = []
     for game in game_htmls:
-        eta = game.find('div', {'class': 'ml-eta'}).text
-        if len(eta.split()) != 1 and 'm' not in eta:  # Filters all games further than an hour away
+        eta = game.find('div', {'class': 'ml-eta'})
+        # Filters all games further than an hour away
+        if eta is None or len(eta.text.split()) != 1 or 'm' not in eta.text:
             continue
         names = game.find_all('div', {'class': 'match-item-vs-team-name'})
         time = datetime.strptime(game.find('div', {'class': 'match-item-time'}).text.strip(), '%I:%M %p')
         now = datetime.now()
         time = time.replace(day=now.day, year=now.year, month=now.month)
-        games.append(Game(game['href'], names[0].text.strip(), names[1].text.strip(), time))
+        game_id = game['href'].split('/')[1]
+        url = 'https://www.vlr.gg' + game['href']
+        games.append(Game(game_id, url, names[0].text.strip(), names[1].text.strip(), time))
     return games
