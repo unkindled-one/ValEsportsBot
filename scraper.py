@@ -62,3 +62,8 @@ async def get_games(event_url: str) -> list[Game]:
         url = 'https://www.vlr.gg' + game['href']
         games.append(Game(game_id, url, names[0].text.strip(), names[1].text.strip(), time))
     return games
+
+
+async def get_game_winner(game: Game):
+    # TODO: Implement checking the winner of a game
+    pass

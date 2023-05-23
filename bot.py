@@ -30,7 +30,7 @@ async def send_upcoming() -> None:
     for guild in client.guilds:
         channel = await get_channel(guild)
         for game in games:
-            await channel.send(await create_game_message(game))
+            await channel.send(await create_game_embed(game))
 
 
 async def get_channel(guild: discord.Guild) -> discord.TextChannel:
@@ -44,16 +44,16 @@ async def get_channel(guild: discord.Guild) -> discord.TextChannel:
     return text_channel
 
 
-async def create_game_message(game: Game) -> None:
+async def create_game_embed(game: Game) -> None:
     """Creates a discord embed based on the game."""
     pass
 
 
 @client.tree.command(name='bet')
 @app_commands.describe(amount='amount', team='team')
-async def make_bet(interaction: discord.Interaction, amount: int) -> None:
+async def make_bet(interaction: discord.Interaction, amount: int, match_number: int, team_number: int) -> None:
     # Make a bet, double amount if correct half it otherwise
-    # Keep a database table with all bets, when the game is finished, pay out
+    # Keeps a database table with all bets, when the game is finished, pay out
     raise NotImplementedError()
 
 
