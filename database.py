@@ -1,30 +1,42 @@
 import sqlite3
 
 
-con = sqlite3.connect("valesportsbot.db")
+con = sqlite3.connect('valesportsbot.db')
 cur = con.cursor()
 
 
+def user_exists(user_id: int) -> bool:
+    res = list(cur.execute(f'SELECT 1 FROM users WHERE ID={user_id}'))
+    return False if not res else True
+
+
 def add_user(user_id: int):
-    cur.execute(f'INSERT INTO user VALUES ({user_id}, 1000)')
+    cur.execute(f'INSERT INTO users VALUES ({user_id}, 1000) ON CONFLICT (ID) DO NOTHING')
     con.commit()
 
 
-def get_balance(user_id: int):
-    pass
+def get_balance(user_id: int) -> int:
+    value = cur.execute(f'SELECT (balance) from users WHERE ID={user_id}')
+    return list(value)[0][0]
 
 
 def add_balance(user_id: int, amount: int) -> None:
-    pass
+    cur.execute(f'UPDATE users SET balance=balance+{amount} WHERE ID={user_id}')
+    con.commit()
 
 
 def subtract_balance(user_id: int, amount: int) -> None:
-    pass
+    cur.execute(f'UPDATE users SET balance=balance-{amount} WHERE ID={user_id}')
+    con.commit()
 
 
-def add_bet(game_id: int, user_id: int, team: int, amount: int) -> None:
+def add_bet(game_id: int, user_id: int, team: int, amount: int) -> bool:
+    if get_balance(user_id) < amount:
+        return False
+    subtract_balance(user_id, amount)
     cur.execute(f'INSERT INTO bet VALUES ({game_id}, {user_id}, {team}, {amount})')
     con.commit()
+    return True
 
 
 def get_bets(game_id: int):
@@ -42,8 +54,6 @@ def payout_bets(game_id: int, winner: int) -> list[str]:
     for bet in bets:
         if bet[2] == winner:
             add_balance(bets[1], bets[3] * 2)
-        else:
-            subtract_balance(bets[1], bets[3])
     return outcomes
 
 
