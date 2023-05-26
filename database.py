@@ -80,7 +80,3 @@ def payout_bets(game_id: int, winner: int) -> list[str]:
 
 
 # TODO: Add database functions for seeing when the user last claimed a daily reward
-
-
-if __name__ == '__main__':
-    print(get_ongoing_games())
