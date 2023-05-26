@@ -64,6 +64,12 @@ async def get_games(event_url: str) -> list[Game]:
     return games
 
 
-async def get_game_winner(game: Game):
+async def get_game_winner(game: Game) -> int:
     # TODO: Implement checking the winner of a game
+    """Returns the winner of a given game. 1 if team1 won, 2 if team2 won, and 0 if the game is ongoing"""
     pass
+
+
+if __name__ == '__main__':
+    import asyncio
+    print(asyncio.run(get_games('https://www.vlr.gg/event/matches/1189/champions-tour-2023-americas-league/?series_id=2867')))

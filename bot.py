@@ -11,8 +11,7 @@ intents.message_content = True
 client = commands.Bot(command_prefix='/', intents=intents)
 val_color = discord.Color.from_rgb(250, 64, 84)
 
-sent_embeds: list = list()
-matches: dict = dict()
+sent_embeds: list = list()  # Possibly unnecessary
 
 
 @client.event
@@ -32,6 +31,8 @@ async def on_ready() -> None:
 async def send_upcoming() -> None:
     """Sends the upcoming games to the guilds."""
     games = await get_upcoming_games()
+    for game in games:
+        db.add_ongoing_game(game.id)
     for guild in client.guilds:
         channel = await get_channel(guild)
         for game in games:
@@ -63,7 +64,9 @@ async def create_game_embed(game: Game) -> None:
 async def make_bet(interaction: discord.Interaction, amount: int, match_number: int, team_number: int) -> None:
     # Make a bet, double amount if correct half it otherwise
     # Keeps a database table with all bets, when the game is finished, pay out
-    # TODO: Add check to see if match actually exists
+    if not db.is_ongoing_game(match_number):
+        embed = discord.Embed(title=f'Match not found', color=val_color)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
     if not db.user_exists(interaction.user.id):
         db.add_user(interaction.user.id)
     result = db.add_bet(match_number, interaction.user.id, team_number, amount)
