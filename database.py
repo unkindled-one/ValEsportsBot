@@ -1,4 +1,5 @@
 import sqlite3
+from scraper import Game
 
 
 con = sqlite3.connect('valesportsbot.db')
@@ -12,6 +13,27 @@ def user_exists(user_id: int) -> bool:
 
 def add_user(user_id: int):
     cur.execute(f'INSERT INTO users VALUES ({user_id}, 1000) ON CONFLICT (ID) DO NOTHING')
+    con.commit()
+
+
+def add_ongoing_game(game_id: int):
+    cur.execute(f'INSERT INTO games VALUES ({game_id}) ON CONFLICT (game_id) DO NOTHING')
+
+
+def get_ongoing_games():
+    return list(x[0] for x in cur.execute('SELECT * from games'))
+
+
+def is_ongoing_game(game_id: int) -> bool:
+    games = list(cur.execute(f'SELECT (game_id) from games WHERE game_id={game_id}'))
+    if games:
+        return True
+    else:
+        return False
+
+
+def remove_game(game_id: int):
+    cur.execute(f'DELETE FROM games WHERE game_id={game_id}')
     con.commit()
 
 
@@ -61,4 +83,4 @@ def payout_bets(game_id: int, winner: int) -> list[str]:
 
 
 if __name__ == '__main__':
-    pass
+    print(get_ongoing_games())
